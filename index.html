@@ -1,0 +1,1384 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MiMo Chat - رابط چت وب</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0f0f0f;
+      --bg-secondary: #1a1a1a;
+      --bg-tertiary: #252525;
+      --bg-hover: #2a2a2a;
+      --border: #333;
+      --text-primary: #e5e5e5;
+      --text-secondary: #999;
+      --text-tertiary: #666;
+      --accent: #6366f1;
+      --accent-hover: #818cf8;
+      --accent-dim: rgba(99, 102, 241, 0.15);
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --error: #ef4444;
+      --user-bg: #1e3a5f;
+      --assistant-bg: #1a1a1a;
+      --code-bg: #0d0d0d;
+      --scrollbar-track: #1a1a1a;
+      --scrollbar-thumb: #333;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: 'Vazirmatn', system-ui, -apple-system, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      display: flex;
+      flex-direction: column;
+      line-height: 1.7;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--scrollbar-track);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--scrollbar-thumb);
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #444;
+    }
+
+    /* Header */
+    .header {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      padding: 0.75rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      gap: 1rem;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 600;
+      font-size: 1rem;
+      color: var(--text-primary);
+      text-decoration: none;
+    }
+
+    .logo-icon {
+      width: 28px;
+      height: 28px;
+      background: var(--accent);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      color: white;
+      font-weight: 700;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .connection-status {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      padding: 0.3rem 0.6rem;
+      background: var(--bg-tertiary);
+      border-radius: 20px;
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--error);
+    }
+
+    .status-dot.connected {
+      background: var(--success);
+    }
+
+    .agent-select {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      padding: 0.35rem 0.7rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-family: inherit;
+      cursor: pointer;
+      outline: none;
+    }
+
+    .agent-select:focus {
+      border-color: var(--accent);
+    }
+
+    /* Main Layout */
+    .main-container {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 260px;
+      background: var(--bg-secondary);
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      transition: width 0.2s ease;
+    }
+
+    .sidebar.collapsed {
+      width: 0;
+      overflow: hidden;
+      border-left: none;
+    }
+
+    .sidebar-header {
+      padding: 0.75rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .sidebar-title {
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    .new-session-btn {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      transition: background 0.15s ease;
+    }
+
+    .new-session-btn:hover {
+      background: var(--accent-hover);
+    }
+
+    .sessions-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0.5rem;
+    }
+
+    .session-item {
+      padding: 0.6rem 0.75rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s ease;
+      margin-bottom: 0.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .session-item:hover {
+      background: var(--bg-hover);
+    }
+
+    .session-item.active {
+      background: var(--accent-dim);
+      border: 1px solid var(--accent);
+    }
+
+    .session-title {
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .session-meta {
+      font-size: 0.7rem;
+      color: var(--text-tertiary);
+    }
+
+    .sidebar-footer {
+      padding: 0.75rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .sidebar-footer-btn {
+      width: 100%;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      padding: 0.5rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .sidebar-footer-btn:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    /* Chat Area */
+    .chat-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-width: 0;
+    }
+
+    .messages-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .message {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      max-width: 85%;
+      animation: fadeIn 0.2s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .message.user {
+      align-self: flex-start;
+    }
+
+    .message.assistant {
+      align-self: flex-end;
+    }
+
+    .message-header {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.72rem;
+      color: var(--text-tertiary);
+    }
+
+    .message.user .message-header {
+      flex-direction: row;
+    }
+
+    .message.assistant .message-header {
+      flex-direction: row-reverse;
+    }
+
+    .message-role {
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    .message-bubble {
+      padding: 0.8rem 1rem;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      line-height: 1.8;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+    }
+
+    .message.user .message-bubble {
+      background: var(--user-bg);
+      border-bottom-right-radius: 4px;
+    }
+
+    .message.assistant .message-bubble {
+      background: var(--assistant-bg);
+      border: 1px solid var(--border);
+      border-bottom-left-radius: 4px;
+    }
+
+    .message-bubble pre {
+      background: var(--code-bg);
+      padding: 0.8rem;
+      border-radius: 6px;
+      overflow-x: auto;
+      margin: 0.5rem 0;
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 0.82rem;
+      direction: ltr;
+      text-align: left;
+      border: 1px solid var(--border);
+    }
+
+    .message-bubble code {
+      background: var(--code-bg);
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 0.85em;
+      direction: ltr;
+      unicode-bidi: embed;
+    }
+
+    .message-bubble pre code {
+      background: none;
+      padding: 0;
+    }
+
+    .tool-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      background: var(--bg-tertiary);
+      padding: 0.3rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      margin: 0.25rem 0;
+    }
+
+    .tool-status.running {
+      color: var(--warning);
+    }
+
+    .tool-status.completed {
+      color: var(--success);
+    }
+
+    /* Input Area */
+    .input-area {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid var(--border);
+      background: var(--bg-secondary);
+    }
+
+    .input-wrapper {
+      display: flex;
+      align-items: flex-end;
+      gap: 0.75rem;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.5rem;
+      transition: border-color 0.15s ease;
+    }
+
+    .input-wrapper:focus-within {
+      border-color: var(--accent);
+    }
+
+    .input-wrapper textarea {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text-primary);
+      font-size: 0.9rem;
+      font-family: inherit;
+      line-height: 1.6;
+      resize: none;
+      outline: none;
+      padding: 0.4rem 0.6rem;
+      max-height: 150px;
+      min-height: 24px;
+    }
+
+    .input-wrapper textarea::placeholder {
+      color: var(--text-tertiary);
+    }
+
+    .send-btn {
+      background: var(--accent);
+      color: white;
+      border: none;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s ease;
+      flex-shrink: 0;
+    }
+
+    .send-btn:hover {
+      background: var(--accent-hover);
+    }
+
+    .send-btn:disabled {
+      background: var(--bg-tertiary);
+      cursor: not-allowed;
+    }
+
+    .send-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* Welcome Screen */
+    .welcome-screen {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .welcome-logo {
+      width: 64px;
+      height: 64px;
+      background: var(--accent);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      color: white;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .welcome-title {
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .welcome-subtitle {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      max-width: 400px;
+    }
+
+    .welcome-hints {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      justify-content: center;
+      margin-top: 1rem;
+    }
+
+    .hint-chip {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .hint-chip:hover {
+      background: var(--accent-dim);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* Connection Dialog */
+    .dialog-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      animation: fadeIn 0.15s ease;
+    }
+
+    .dialog {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      width: 90%;
+      max-width: 400px;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .dialog-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .dialog-input {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      padding: 0.6rem 0.8rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      outline: none;
+      direction: ltr;
+      text-align: left;
+    }
+
+    .dialog-input:focus {
+      border-color: var(--accent);
+    }
+
+    .dialog-actions {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: flex-start;
+    }
+
+    .dialog-btn {
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-family: inherit;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s ease;
+    }
+
+    .dialog-btn.primary {
+      background: var(--accent);
+      color: white;
+    }
+
+    .dialog-btn.primary:hover {
+      background: var(--accent-hover);
+    }
+
+    .dialog-btn.secondary {
+      background: var(--bg-tertiary);
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+    }
+
+    .dialog-btn.secondary:hover {
+      background: var(--bg-hover);
+    }
+
+    .dialog-error {
+      color: var(--error);
+      font-size: 0.8rem;
+      display: none;
+    }
+
+    .dialog-error.visible {
+      display: block;
+    }
+
+    /* Loading Spinner */
+    .typing-indicator {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.5rem 0;
+      color: var(--text-tertiary);
+      font-size: 0.8rem;
+    }
+
+    .typing-dots {
+      display: flex;
+      gap: 3px;
+    }
+
+    .typing-dots span {
+      width: 5px;
+      height: 5px;
+      background: var(--text-tertiary);
+      border-radius: 50%;
+      animation: bounce 1.2s infinite;
+    }
+
+    .typing-dots span:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .typing-dots span:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    @keyframes bounce {
+      0%, 60%, 100% { transform: translateY(0); }
+      30% { transform: translateY(-4px); }
+    }
+
+    /* Empty State */
+    .empty-sessions {
+      padding: 2rem 1rem;
+      text-align: center;
+      color: var(--text-tertiary);
+      font-size: 0.8rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .sidebar {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 50;
+        width: 280px;
+        transform: translateX(100%);
+        transition: transform 0.2s ease;
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .sidebar.collapsed {
+        width: 280px;
+        transform: translateX(100%);
+      }
+
+      .message {
+        max-width: 95%;
+      }
+
+      .messages-container {
+        padding: 1rem;
+      }
+
+      .input-area {
+        padding: 0.75rem;
+      }
+    }
+
+    /* Toggle Button */
+    .sidebar-toggle {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+    }
+
+    .sidebar-toggle:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    .sidebar-toggle svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* Hidden */
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-right">
+      <button class="sidebar-toggle" id="sidebarToggle" title="لیست نشست‌ها">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+      </button>
+      <a class="logo" href="#">
+        <div class="logo-icon">M</div>
+        <span>MiMo Chat</span>
+      </a>
+    </div>
+    <div class="header-left">
+      <select class="agent-select" id="agentSelect">
+        <option value="build">build</option>
+        <option value="plan">plan</option>
+        <option value="compose">compose</option>
+      </select>
+      <div class="connection-status" id="connectionStatus">
+        <div class="status-dot" id="statusDot"></div>
+        <span id="statusText">قطع شده</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <div class="main-container">
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <span class="sidebar-title">نشست‌ها</span>
+        <button class="new-session-btn" id="newSessionBtn">
+          <span>+</span>
+          <span>جدید</span>
+        </button>
+      </div>
+      <div class="sessions-list" id="sessionsList">
+        <div class="empty-sessions" id="emptySessions">
+          هنوز نشستی وجود ندارد
+        </div>
+      </div>
+      <div class="sidebar-footer">
+        <button class="sidebar-footer-btn" id="settingsBtn">تنظیمات اتصال</button>
+      </div>
+    </aside>
+
+    <!-- Chat Area -->
+    <main class="chat-area">
+      <!-- Welcome Screen -->
+      <div class="welcome-screen" id="welcomeScreen">
+        <div class="welcome-logo">M</div>
+        <div class="welcome-title">به MiMo Chat خوش آمدید</div>
+        <div class="welcome-subtitle">
+          برای شروع، ابتدا به سرور MiMoCode متصل شوید و یک نشست جدید ایجاد کنید.
+        </div>
+        <div class="welcome-hints">
+          <div class="hint-chip" data-hint="کد من را بررسی کن">بررسی کد</div>
+          <div class="hint-chip" data-hint="یک برنامه بنویس">نوشتن برنامه</div>
+          <div class="hint-chip" data-hint="مشکل را حل کن">حل مشکل</div>
+        </div>
+      </div>
+
+      <!-- Messages -->
+      <div class="messages-container hidden" id="messagesContainer">
+      </div>
+
+      <!-- Input Area -->
+      <div class="input-area hidden" id="inputArea">
+        <div class="input-wrapper">
+          <textarea
+            id="messageInput"
+            placeholder="پیام خود را بنویسید..."
+            rows="1"
+          ></textarea>
+          <button class="send-btn" id="sendBtn" disabled title="ارسال">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 2L11 13"/>
+              <path d="M22 2L15 22L11 13L2 9L22 2Z"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Connection Dialog -->
+  <div class="dialog-overlay hidden" id="connectionDialog">
+    <div class="dialog">
+      <div class="dialog-title">اتصال به سرور MiMoCode</div>
+      <input
+        type="text"
+        class="dialog-input"
+        id="serverUrl"
+        placeholder="http://127.0.0.1:3000"
+        value="http://127.0.0.1:3000"
+      >
+      <div class="dialog-error" id="connectionError">اتصال برقرار نشد. آدرس را بررسی کنید.</div>
+      <div class="dialog-actions">
+        <button class="dialog-btn primary" id="connectBtn">اتصال</button>
+        <button class="dialog-btn secondary" id="cancelConnectBtn">لغو</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Permission Dialog -->
+  <div class="dialog-overlay hidden" id="permissionDialog">
+    <div class="dialog" style="max-width: 500px;">
+      <div class="dialog-title" id="permissionTitle">درخواست دسترسی</div>
+      <div id="permissionBody" style="margin: 0.5rem 0; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.8;"></div>
+      <div id="permissionMeta" style="background: var(--bg-tertiary); padding: 0.6rem 0.8rem; border-radius: 6px; font-family: monospace; font-size: 0.75rem; color: var(--text-secondary); direction: ltr; text-align: left; max-height: 150px; overflow-y: auto; margin-bottom: 0.5rem; white-space: pre-wrap; word-break: break-all;"></div>
+      <div class="dialog-actions" style="gap: 0.5rem;">
+        <button class="dialog-btn primary" id="permAllowBtn" style="background: var(--success);">اجازه</button>
+        <button class="dialog-btn secondary" id="permDenyBtn" style="background: var(--error); color: white; border: none;"> رد</button>
+        <button class="dialog-btn secondary" id="permAlwaysBtn" style="background: var(--accent); color: white; border: none;">همیشه اجازه</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ========== State ==========
+    const state = {
+      baseUrl: null,
+      connected: false,
+      sessions: [],
+      currentSessionId: null,
+      messages: [],
+      isStreaming: false,
+      eventSource: null,
+      pendingPermission: null,
+    };
+
+    // ========== DOM Elements ==========
+    const $ = (sel) => document.querySelector(sel);
+    const $$ = (sel) => document.querySelectorAll(sel);
+
+    const els = {
+      sidebar: $('#sidebar'),
+      sidebarToggle: $('#sidebarToggle'),
+      sessionsList: $('#sessionsList'),
+      emptySessions: $('#emptySessions'),
+      newSessionBtn: $('#newSessionBtn'),
+      settingsBtn: $('#settingsBtn'),
+      welcomeScreen: $('#welcomeScreen'),
+      messagesContainer: $('#messagesContainer'),
+      inputArea: $('#inputArea'),
+      messageInput: $('#messageInput'),
+      sendBtn: $('#sendBtn'),
+      agentSelect: $('#agentSelect'),
+      statusDot: $('#statusDot'),
+      statusText: $('#statusText'),
+      connectionDialog: $('#connectionDialog'),
+      serverUrl: $('#serverUrl'),
+      connectBtn: $('#connectBtn'),
+      cancelConnectBtn: $('#cancelConnectBtn'),
+      connectionError: $('#connectionError'),
+      permissionDialog: $('#permissionDialog'),
+      permissionTitle: $('#permissionTitle'),
+      permissionBody: $('#permissionBody'),
+      permissionMeta: $('#permissionMeta'),
+      permAllowBtn: $('#permAllowBtn'),
+      permDenyBtn: $('#permDenyBtn'),
+      permAlwaysBtn: $('#permAlwaysBtn'),
+    };
+
+    // ========== API Helpers ==========
+    async function api(path, options = {}) {
+      if (!state.baseUrl) throw new Error('Not connected');
+      const url = state.baseUrl + path;
+      const res = await fetch(url, {
+        headers: { 'Content-Type': 'application/json', ...options.headers },
+        ...options,
+      });
+      if (!res.ok) {
+        const err = await res.text();
+        throw new Error(`API Error ${res.status}: ${err}`);
+      }
+      return res.json();
+    }
+
+    // ========== Connection ==========
+    function setConnected(connected, url) {
+      state.connected = connected;
+      state.baseUrl = url;
+      els.statusDot.classList.toggle('connected', connected);
+      els.statusText.textContent = connected ? 'متصل' : 'قطع شده';
+      if (connected) {
+        localStorage.setItem('mimocode_server_url', url);
+      }
+    }
+
+    async function tryConnect() {
+      const url = els.serverUrl.value.trim();
+      if (!url) return;
+
+      els.connectionError.classList.remove('visible');
+      els.connectBtn.disabled = true;
+      els.connectBtn.textContent = 'در حال اتصال...';
+
+      try {
+        const res = await fetch(url + '/session', { method: 'GET', signal: AbortSignal.timeout(3000) });
+        if (!res.ok) throw new Error('not ok');
+        setConnected(true, url);
+        els.connectionDialog.classList.add('hidden');
+        loadSessions();
+        startEventStream();
+      } catch (e) {
+        // Try auto-scan
+        const ports = [3000, 4000, 5000, 8000, 8080, 9000];
+        let found = false;
+        for (const port of ports) {
+          try {
+            const base = new URL(url).origin.replace(/:\d+$/, '');
+            const testUrl = `${base}:${port}`;
+            const r = await fetch(`${testUrl}/session`, { method: 'GET', signal: AbortSignal.timeout(500) });
+            if (r.ok) {
+              setConnected(true, testUrl);
+              els.connectionDialog.classList.add('hidden');
+              loadSessions();
+              startEventStream();
+              found = true;
+              break;
+            }
+          } catch (e2) {}
+        }
+        if (!found) {
+          els.connectionError.textContent = `اتصال به ${url} برقرار نشد. مطمئن شوید mimo serve در حال اجراست.`;
+          els.connectionError.classList.add('visible');
+        }
+      }
+
+      els.connectBtn.disabled = false;
+      els.connectBtn.textContent = 'اتصال';
+    }
+
+    function showConnectionDialog() {
+      els.connectionDialog.classList.remove('hidden');
+      els.serverUrl.value = state.baseUrl || 'http://127.0.0.1:3000';
+      els.connectionError.classList.remove('visible');
+    }
+
+    // ========== Sessions ==========
+    async function loadSessions() {
+      try {
+        const data = await api('/session');
+        state.sessions = Array.isArray(data) ? data : [];
+        renderSessions();
+      } catch (e) {
+        console.error('Failed to load sessions:', e);
+      }
+    }
+
+    function renderSessions() {
+      const list = els.sessionsList;
+      list.innerHTML = '';
+      if (state.sessions.length === 0) {
+        list.innerHTML = '<div class="empty-sessions">هنوز نشستی وجود ندارد</div>';
+        return;
+      }
+      state.sessions.forEach(s => {
+        const div = document.createElement('div');
+        div.className = 'session-item' + (s.id === state.currentSessionId ? ' active' : '');
+        const date = new Date(s.time?.created || Date.now());
+        const timeStr = date.toLocaleDateString('fa-IR') + ' ' + date.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
+        div.innerHTML = `
+          <div class="session-title">${escapeHtml(s.title || 'نشست جدید')}</div>
+          <div class="session-meta">${timeStr}</div>
+        `;
+        div.onclick = () => switchSession(s.id);
+        div.oncontextmenu = (e) => {
+          e.preventDefault();
+          if (confirm('آیا از حذف این نشست اطمینان دارید؟')) {
+            deleteSession(s.id);
+          }
+        };
+        list.appendChild(div);
+      });
+    }
+
+    async function createSession() {
+      try {
+        const data = await api('/session', { method: 'POST', body: '{}' });
+        state.sessions.unshift(data);
+        renderSessions();
+        switchSession(data.id);
+      } catch (e) {
+        console.error('Failed to create session:', e);
+      }
+    }
+
+    async function deleteSession(sessionId) {
+      try {
+        await api(`/session/${sessionId}`, { method: 'DELETE' });
+        state.sessions = state.sessions.filter(s => s.id !== sessionId);
+        if (state.currentSessionId === sessionId) {
+          state.currentSessionId = null;
+          els.welcomeScreen.classList.remove('hidden');
+          els.messagesContainer.classList.add('hidden');
+          els.inputArea.classList.add('hidden');
+        }
+        renderSessions();
+      } catch (e) {
+        console.error('Failed to delete session:', e);
+      }
+    }
+
+    async function switchSession(sessionId) {
+      state.currentSessionId = sessionId;
+      renderSessions();
+      await loadMessages(sessionId);
+      els.welcomeScreen.classList.add('hidden');
+      els.messagesContainer.classList.remove('hidden');
+      els.inputArea.classList.remove('hidden');
+      scrollToBottom();
+    }
+
+    // ========== Messages ==========
+    async function loadMessages(sessionId) {
+      try {
+        const data = await api(`/session/${sessionId}/message`);
+        state.messages = Array.isArray(data) ? data : [];
+        renderMessages();
+      } catch (e) {
+        console.error('Failed to load messages:', e);
+      }
+    }
+
+    function renderMessages() {
+      const container = els.messagesContainer;
+      container.innerHTML = '';
+      state.messages.forEach(msg => {
+        appendMessage(msg);
+      });
+      scrollToBottom();
+    }
+
+    function appendMessage(msg) {
+      const container = els.messagesContainer;
+      const role = msg.role || msg.info?.role || 'user';
+      const div = document.createElement('div');
+      div.className = `message ${role}`;
+      div.dataset.messageId = msg.id || msg.info?.id;
+
+      const timestamp = msg.time?.created || msg.info?.time?.created;
+      const time = timestamp ? new Date(timestamp).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' }) : '';
+
+      let content = '';
+      if (role === 'user') {
+        content = extractUserText(msg);
+      } else {
+        content = extractAssistantText(msg);
+      }
+
+      div.innerHTML = `
+        <div class="message-header">
+          <span class="message-role">${role === 'user' ? 'شما' : 'MiMo'}</span>
+          <span>${time}</span>
+        </div>
+        <div class="message-bubble">${content}</div>
+      `;
+      container.appendChild(div);
+    }
+
+    function extractUserText(msg) {
+      if (msg.content) return escapeHtml(msg.content);
+      const parts = msg.parts || [];
+      const textPart = parts.find(p => p.type === 'text');
+      if (textPart) return escapeHtml(textPart.text || '');
+      return '';
+    }
+
+    function extractAssistantText(msg) {
+      let parts = [];
+      const msgParts = msg.parts || [];
+
+      msgParts.forEach(p => {
+        if (p.type === 'text') {
+          parts.push(renderMarkdown(p.text || ''));
+        } else if (p.type === 'tool') {
+          const toolState = p.state || {};
+          const statusClass = toolState.status === 'running' ? 'running' : 'completed';
+          const toolName = p.tool || 'tool';
+          const input = toolState.input ? Object.entries(toolState.input).map(([k,v]) => `${k}: ${typeof v === 'string' ? v.substring(0,50) : ''}`).join(', ') : '';
+          parts.push(`<div class="tool-status ${statusClass}">
+            <span>${escapeHtml(toolName)}</span>
+            <span>${toolState.status === 'running' ? 'در حال اجرا...' : 'انجام شد'}</span>
+            ${input ? `<span style="font-size:0.7rem;color:var(--text-tertiary)">${escapeHtml(input)}</span>` : ''}
+          </div>`);
+        } else if (p.type === 'reasoning') {
+          // Skip reasoning for cleaner display
+        }
+      });
+
+      if (parts.length > 0) return parts.join('');
+      if (msg.content) return renderMarkdown(msg.content);
+      return '<span style="color: var(--text-tertiary)">در حال پردازش...</span>';
+    }
+
+    function renderMarkdown(text) {
+      if (!text) return '';
+      let html = escapeHtml(text);
+      // Code blocks
+      html = html.replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>');
+      html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+      // Bold
+      html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+      // Italic
+      html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+      // Line breaks
+      html = html.replace(/\n/g, '<br>');
+      return html;
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // ========== Permission Handling ==========
+    const PERMISSION_TYPES = {
+      edit: 'ویرایش فایل',
+      bash: 'اجرای دستور',
+      webfetch: 'دریافت از وب',
+      doom_loop: 'حلقه بی‌نهایت',
+      external_directory: 'دسترسی به پوشه خارجی',
+    };
+
+    function showPermissionDialog(permission) {
+      state.pendingPermission = permission;
+
+      const type = permission.type || 'unknown';
+      const title = permission.title || 'درخواست دسترسی';
+      const typeName = PERMISSION_TYPES[type] || type;
+      const meta = permission.metadata || {};
+
+      els.permissionTitle.textContent = `${typeName}: ${title}`;
+
+      let bodyHtml = '';
+      if (meta.pattern) {
+        bodyHtml += `<div style="margin-bottom:0.3rem"><strong>الگو:</strong> <code style="background:var(--code-bg);padding:0.1rem 0.3rem;border-radius:3px;font-size:0.8rem">${escapeHtml(String(meta.pattern))}</code></div>`;
+      }
+      if (meta.command) {
+        bodyHtml += `<div style="margin-bottom:0.3rem"><strong>دستور:</strong></div>`;
+      }
+      els.permissionBody.innerHTML = bodyHtml;
+
+      // Show command/details in meta box
+      let metaText = '';
+      if (meta.command) {
+        metaText = Array.isArray(meta.command) ? meta.command.join(' ') : String(meta.command);
+      } else if (title) {
+        metaText = title;
+      }
+      if (metaText) {
+        els.permissionMeta.textContent = metaText;
+        els.permissionMeta.style.display = 'block';
+      } else {
+        els.permissionMeta.style.display = 'none';
+      }
+
+      els.permissionDialog.classList.remove('hidden');
+    }
+
+    async function respondPermission(response) {
+      const perm = state.pendingPermission;
+      if (!perm) return;
+
+      els.permissionDialog.classList.add('hidden');
+      state.pendingPermission = null;
+
+      try {
+        await api(`/session/${perm.sessionID}/permissions/${perm.id}`, {
+          method: 'POST',
+          body: JSON.stringify({ response }),
+        });
+      } catch (e) {
+        console.error('Failed to respond to permission:', e);
+      }
+    }
+
+    // ========== Event Stream ==========
+    function startEventStream() {
+      if (state.eventSource) {
+        state.eventSource.close();
+      }
+      try {
+        state.eventSource = new EventSource(state.baseUrl + '/event');
+        state.eventSource.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            handleEvent(data);
+          } catch (e) {}
+        };
+        state.eventSource.onerror = () => {
+          setTimeout(() => {
+            if (state.connected) startEventStream();
+          }, 3000);
+        };
+      } catch (e) {
+        console.error('EventSource error:', e);
+      }
+    }
+
+    function handleEvent(event) {
+      if (!event || !event.type) return;
+
+      switch (event.type) {
+        case 'message.updated':
+          if (event.properties?.info?.sessionID === state.currentSessionId) {
+            loadMessages(state.currentSessionId);
+          }
+          break;
+        case 'message.part.updated':
+          if (event.properties?.part?.sessionID === state.currentSessionId) {
+            loadMessages(state.currentSessionId);
+          }
+          break;
+        case 'session.updated':
+          loadSessions();
+          break;
+        case 'session.created':
+          loadSessions();
+          break;
+        case 'session.idle':
+          removeTypingIndicator();
+          state.isStreaming = false;
+          updateSendButton();
+          if (event.properties?.sessionID === state.currentSessionId) {
+            loadMessages(state.currentSessionId);
+          }
+          break;
+        case 'permission.updated':
+          if (event.properties?.sessionID === state.currentSessionId) {
+            showPermissionDialog(event.properties);
+          }
+          break;
+      }
+    }
+
+    // ========== UI Helpers ==========
+    function updateSendButton() {
+      const hasText = els.messageInput.value.trim().length > 0;
+      els.sendBtn.disabled = !hasText || state.isStreaming || !state.connected;
+    }
+
+    function autoResizeInput() {
+      const ta = els.messageInput;
+      ta.style.height = 'auto';
+      ta.style.height = Math.min(ta.scrollHeight, 150) + 'px';
+    }
+
+    // ========== Event Listeners ==========
+    els.sidebarToggle.onclick = () => {
+      els.sidebar.classList.toggle('collapsed');
+    };
+
+    els.newSessionBtn.onclick = () => {
+      if (!state.connected) {
+        showConnectionDialog();
+        return;
+      }
+      createSession();
+    };
+
+    els.settingsBtn.onclick = showConnectionDialog;
+
+    els.sendBtn.onclick = sendMessage;
+
+    els.messageInput.oninput = () => {
+      autoResizeInput();
+      updateSendButton();
+    };
+
+    els.messageInput.onkeydown = (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    };
+
+    els.connectBtn.onclick = tryConnect;
+
+    els.cancelConnectBtn.onclick = () => {
+      els.connectionDialog.classList.add('hidden');
+    };
+
+    els.serverUrl.onkeydown = (e) => {
+      if (e.key === 'Enter') tryConnect();
+    };
+
+    // Permission buttons
+    els.permAllowBtn.onclick = () => respondPermission('allow');
+    els.permDenyBtn.onclick = () => respondPermission('deny');
+    els.permAlwaysBtn.onclick = () => respondPermission('always');
+
+    $$('.hint-chip').forEach(chip => {
+      chip.onclick = () => {
+        els.messageInput.value = chip.dataset.hint;
+        autoResizeInput();
+        updateSendButton();
+        els.messageInput.focus();
+      };
+    });
+
+    // ========== Init ==========
+    (async function init() {
+      const savedUrl = localStorage.getItem('mimocode_server_url');
+      if (savedUrl) {
+        els.serverUrl.value = savedUrl;
+        try {
+          const res = await fetch(savedUrl + '/session', { method: 'GET' });
+          if (!res.ok) throw new Error('not ok');
+          setConnected(true, savedUrl);
+          loadSessions();
+          startEventStream();
+          return;
+        } catch (e) {
+          // saved URL not working, try auto-detect
+        }
+      }
+
+      // Auto-detect port
+      const ports = [3000, 4000, 5000, 8000, 8080, 9000, 49152, 49153];
+      for (const port of ports) {
+        try {
+          const res = await fetch(`http://127.0.0.1:${port}/session`, { method: 'GET', signal: AbortSignal.timeout(1000) });
+          if (res.ok) {
+            const url = `http://127.0.0.1:${port}`;
+            setConnected(true, url);
+            loadSessions();
+            startEventStream();
+            return;
+          }
+        } catch (e) {}
+      }
+
+      // Nothing found, show dialog
+      els.serverUrl.value = 'http://127.0.0.1:3000';
+      showConnectionDialog();
+    })();
+  </script>
+</body>
+</html>

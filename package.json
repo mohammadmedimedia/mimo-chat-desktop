@@ -1,0 +1,17 @@
+{
+  "name": "mimo-chat",
+  "version": "1.0.0",
+  "description": "MiMo Chat Desktop - رابط چت وب دسکتاپ",
+  "main": "index.html",
+  "scripts": {
+    "tauri": "tauri",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build"
+  },
+  "keywords": ["mimo", "chat", "desktop", "ai", "persian"],
+  "author": "MiMo Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@tauri-apps/cli": "^2"
+  }
+}
