@@ -1346,27 +1346,54 @@
     // ========== Init ==========
     (async function init() {
       const savedUrl = localStorage.getItem('mimocode_server_url');
+
+      // Try saved URL first
       if (savedUrl) {
         els.serverUrl.value = savedUrl;
         try {
-          const res = await fetch(savedUrl + '/session', { method: 'GET' });
-          if (!res.ok) throw new Error('not ok');
-          setConnected(true, savedUrl);
-          loadSessions();
-          startEventStream();
-          return;
-        } catch (e) {
-          // saved URL not working, try auto-detect
-        }
+          const res = await fetch(savedUrl + '/session', { method: 'GET', signal: AbortSignal.timeout(3000) });
+          if (res.ok) {
+            setConnected(true, savedUrl);
+            loadSessions();
+            startEventStream();
+            return;
+          }
+        } catch (e) {}
       }
 
-      // Auto-detect port
+      // Try to get port from Tauri backend
+      let detectedUrl = null;
+      if (window.__TAURI_INTERNALS__) {
+        try {
+          const port = await window.__TAURI_INTERNALS__.invoke('get_mimo_port');
+          detectedUrl = `http://127.0.0.1:${port}`;
+          // Wait a moment for mimo serve to start
+          await new Promise(r => setTimeout(r, 2000));
+        } catch (e) {}
+      }
+
+      // Try detected URL
+      if (detectedUrl) {
+        try {
+          const res = await fetch(detectedUrl + '/session', { method: 'GET', signal: AbortSignal.timeout(3000) });
+          if (res.ok) {
+            els.serverUrl.value = detectedUrl;
+            setConnected(true, detectedUrl);
+            loadSessions();
+            startEventStream();
+            return;
+          }
+        } catch (e) {}
+      }
+
+      // Auto-detect port by scanning
       const ports = [3000, 4000, 5000, 8000, 8080, 9000, 49152, 49153];
       for (const port of ports) {
         try {
           const res = await fetch(`http://127.0.0.1:${port}/session`, { method: 'GET', signal: AbortSignal.timeout(1000) });
           if (res.ok) {
             const url = `http://127.0.0.1:${port}`;
+            els.serverUrl.value = url;
             setConnected(true, url);
             loadSessions();
             startEventStream();
@@ -1376,7 +1403,7 @@
       }
 
       // Nothing found, show dialog
-      els.serverUrl.value = 'http://127.0.0.1:3000';
+      els.serverUrl.value = detectedUrl || 'http://127.0.0.1:3000';
       showConnectionDialog();
     })();
   </script>
